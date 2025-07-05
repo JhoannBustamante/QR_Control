@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "444104855174",
+    "project_id": "qr-control-e2aa0",
+    "storage_bucket": "qr-control-e2aa0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444104855174:android:9ea91bbae6c6bbc2bf0b07",
+        "android_client_info": {
+          "package_name": "com.espoch.qrcontrol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "444104855174-rv1oacsd94nlo051b0p0he0c08hntumb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.espoch.qrcontrol",
+            "certificate_hash": "5c53802638d2a4f2ff37933169214ea984bfd573"
+          }
+        },
+        {
+          "client_id": "444104855174-gv3j3rupq33f5o68m484i6085n8p0uej.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBa0RAyl1MCXMo7r3jYu-PhbcU5B3sFRSo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "444104855174-gv3j3rupq33f5o68m484i6085n8p0uej.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
