@@ -1,6 +1,5 @@
 package com.espoch.qrcontrol.data
 
-import androidx.compose.runtime.Composable
 import com.espoch.qrcontrol.model.Cars
 import com.espoch.qrcontrol.model.ParkingSpot
 import com.espoch.qrcontrol.model.HistorialParking

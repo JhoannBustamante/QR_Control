@@ -6,7 +6,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -27,6 +26,7 @@ import androidx.compose.ui.window.Dialog
 import com.espoch.qrcontrol.R
 import com.espoch.qrcontrol.data.AuthRepository
 import com.espoch.qrcontrol.ui.Custom.GeneralButton
+import com.espoch.qrcontrol.ui.theme.QrColors
 import com.espoch.qrcontrol.ui.theme.qrColors
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -166,7 +166,7 @@ private fun AppLogo() {
 private fun WelcomeTitle(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
     Text(
         text = "Bienvenido a \n QR Control",
-        color = colors.primary,
+        color = colors.text,
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
         style = MaterialTheme.typography.headlineMedium,
@@ -184,7 +184,7 @@ private fun WelcomeTitle(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
 private fun LoginButtons(
     onLoginClick: () -> Unit,
     onGoogleSignIn: () -> Unit,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors
 ) {
     // Botón para login con email
     GeneralButton(

@@ -1,6 +1,5 @@
 package com.espoch.qrcontrol.ui.Qr
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,8 +19,6 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import androidx.navigation.NavController
 import com.espoch.qrcontrol.ui.theme.QrColors
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.material3.LocalTextStyle
 
 @Composable

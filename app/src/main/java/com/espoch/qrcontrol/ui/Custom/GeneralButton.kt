@@ -23,7 +23,7 @@ fun GeneralButton(
 ) {
     Box(
         modifier = modifier
-            .border(1.dp, colors.outline, CircleShape)
+            .border(1.dp, colors.text, CircleShape)
             .fillMaxWidth()
             .height(50.dp)
             .padding(horizontal = 4.dp),
@@ -38,7 +38,7 @@ fun GeneralButton(
         )
         Text(
             text = title,
-            color = colors.onPrimary,
+            color = colors.text,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold

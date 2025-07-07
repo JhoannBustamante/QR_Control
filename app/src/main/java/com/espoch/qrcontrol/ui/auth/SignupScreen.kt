@@ -393,7 +393,7 @@ private fun SignupButton(
         Button(
             onClick = onSignupClick,
             shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(colors.primary),
+            colors = ButtonDefaults.buttonColors(colors.accent),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -422,12 +422,12 @@ private fun LoginLink(
     Row {
         Text(
             text = "¿Ya tienes cuenta? ",
-            color = colors.onPrimary,
+            color = colors.text.copy(alpha = 0.7f),
             fontWeight = FontWeight.Bold
         )
         Text(
             text = "Inicia sesión",
-            color = colors.primary,
+            color = colors.text,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.clickable { onLoginClick() }
         )

@@ -434,9 +434,9 @@ private fun CompactParkingSpot(
     }
     
     val textColor = when (spot.estado) {
-        "disponible" -> colors.primary
-        "ocupado"    -> colors.onPrimary
-        "reservado"  -> colors.primary
+        "disponible" -> colors.text
+        "ocupado"    -> colors.text
+        "reservado"  -> colors.text
         else          -> colors.onPrimary
     }
     

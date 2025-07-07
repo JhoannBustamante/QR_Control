@@ -297,7 +297,7 @@ private fun LoginButton(
         Button(
             onClick = onLoginClick,
             shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(colors.primary),
+            colors = ButtonDefaults.buttonColors(colors.accent),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -326,13 +326,13 @@ private fun RegisterLink(
     Row {
         Text(
             text = "¿No tienes cuenta? ",
-            color = colors.text,
+            color = colors.text.copy(alpha = 0.7f),
             fontWeight = FontWeight.Bold
         )
         Text(
             text = "Regístrate",
             fontWeight = FontWeight.Bold,
-            color = colors.primary,
+            color = colors.text,
             modifier = Modifier.clickable { onRegisterClick() }
         )
     }

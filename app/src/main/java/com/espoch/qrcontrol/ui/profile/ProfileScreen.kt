@@ -222,11 +222,11 @@ private fun ProfileHeader(userData: user?, colors: QrColors, onEditClick: () -> 
                 Surface(
                     color = if (userData?.role == "supervisor") colors.primaryContainer else colors.secondaryContainer,
                     shape = RoundedCornerShape(50),
-                    shadowElevation = 0.dp
+                    shadowElevation = 0.dp,
                 ) {
                     Text(
                         text = if (userData?.role == "supervisor") "Supervisor" else "Usuario",
-                        color = if (userData?.role == "supervisor") colors.onPrimary else colors.onSecondary,
+                        color = if (userData?.role == "supervisor") colors.text else colors.text,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
@@ -299,7 +299,7 @@ private fun InfoRow(
         Icon(
             painter = icon,
             contentDescription = label,
-            tint = colors.primary,
+            tint = colors.text,
             modifier = Modifier.size(20.dp)
         )
         
@@ -308,12 +308,12 @@ private fun InfoRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = label,
-                color = colors.primary,
+                color = colors.text,
                 fontSize = 12.sp
             )
             Text(
                 text = value,
-                color = colors.primary,
+                color = colors.text,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
             )

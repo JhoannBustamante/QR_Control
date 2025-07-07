@@ -1,6 +1,5 @@
 package com.espoch.qrcontrol.ui.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -34,9 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import com.espoch.qrcontrol.ui.Qr.QRCodeViewScreen
 import com.espoch.qrcontrol.ui.theme.QrColors
 import kotlinx.coroutines.launch
-import coil3.compose.rememberAsyncImagePainter
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 
 /**
  * Pantalla principal de la aplicación
@@ -197,7 +194,7 @@ private fun getGreetingByHour(): String {
 private fun SupervisorFAB(
     userRole: String,
     onScanClick: () -> Unit,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors
 ) {
     if (userRole == "supervisor") {
         FloatingActionButton(
@@ -357,7 +354,7 @@ private fun GreetingCard(colors: QrColors, greeting: String, userName: String, o
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "Ver perfil",
-                    tint = colors.primary,
+                    tint = colors.text,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -450,7 +447,7 @@ private fun CarItemCardWithActions(car: Cars, colors: QrColors, onCarUpdated: ()
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "Auto",
-                    tint = colors.primary,
+                    tint = colors.text,
                     modifier = Modifier.size(32.dp)
                 )
                 Spacer(Modifier.width(12.dp))

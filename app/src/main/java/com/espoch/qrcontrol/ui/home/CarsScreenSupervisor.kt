@@ -3,11 +3,9 @@ package com.espoch.qrcontrol.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -27,9 +25,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.espoch.qrcontrol.model.Cars
@@ -71,7 +69,7 @@ fun CarsScreenSupervisor(
             // Título clickeable que expande/contrae la información
             CarSupervisorTitle(
                 car = car, 
-                colors = colors, 
+                colors = colors.text,
                 isExpanded = isExpanded,
                 onToggle = { isExpanded = !isExpanded }
             )
@@ -96,8 +94,8 @@ fun CarsScreenSupervisor(
 
 @Composable
 private fun CarSupervisorTitle(
-    car: Cars, 
-    colors: QrColors, 
+    car: Cars,
+    colors: Color,
     isExpanded: Boolean,
     onToggle: () -> Unit
 ) {
@@ -110,7 +108,7 @@ private fun CarSupervisorTitle(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("${car.plate}",
-            color = colors.text,
+            color = colors,
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Start,
@@ -120,7 +118,7 @@ private fun CarSupervisorTitle(
         Icon(
             imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
             contentDescription = if (isExpanded) "Contraer" else "Expandir",
-            tint = colors.primary.copy(alpha = 0.7f),
+            tint = colors.copy(alpha = 0.7f),
             modifier = Modifier.padding(start = 8.dp)
         )
     }
