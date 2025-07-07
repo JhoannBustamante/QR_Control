@@ -30,6 +30,7 @@ import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.google.accompanist.permissions.PermissionState
+import com.espoch.qrcontrol.ui.theme.qrColors
 
 /**
  * Pantalla de escáner de códigos QR mejorada
@@ -46,14 +47,17 @@ import com.google.accompanist.permissions.PermissionState
  * 
  * @param onQrScanned Callback con el contenido del QR escaneado
  * @param onDismiss Función para cerrar la pantalla
+ * @param isDarkMode Indica si el modo oscuro está activo
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun QRScannerScreen(
     onQrScanned: (String) -> Unit,
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
+    isDarkMode: Boolean
 ) {
     val context = LocalContext.current
+    val colors = qrColors(isDarkMode)
     
     // Estados para manejar permisos y QR escaneado
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
@@ -87,6 +91,7 @@ fun QRScannerScreen(
                 // Overlay con elementos de UI
                 ScannerOverlay(
                     isScanning = isScanning,
+                    isDarkMode = isDarkMode,
                     onClose = onDismiss
                 )
             }
@@ -107,13 +112,16 @@ fun QRScannerScreen(
  * Incluye guías de escaneo, botón de cerrar y textos informativos arriba
  * 
  * @param isScanning Estado de escaneo activo
+ * @param isDarkMode Indica si el modo oscuro está activo
  * @param onClose Función para cerrar el escáner
  */
 @Composable
 private fun ScannerOverlay(
     isScanning: Boolean,
+    isDarkMode: Boolean,
     onClose: () -> Unit
 ) {
+    val colors = qrColors(isDarkMode)
     Box(modifier = Modifier.fillMaxSize()) {
         // Textos informativos en la parte superior
         Column(
@@ -125,13 +133,13 @@ private fun ScannerOverlay(
         ) {
             Text(
                 text = if (isScanning) "Coloca el código QR dentro del marco" else "¡Código QR detectado!",
-                color = Color.White,
+                color = colors.text,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .background(
-                        color = Color.Black.copy(alpha = 0.7f),
+                        color = colors.background.copy(alpha = 0.7f),
                         shape = RoundedCornerShape(8.dp)
                     )
                     .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -139,12 +147,12 @@ private fun ScannerOverlay(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "El escaneo es automático",
-                color = Color.White.copy(alpha = 0.8f),
+                color = colors.text.copy(alpha = 0.8f),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .background(
-                        color = Color.Black.copy(alpha = 0.5f),
+                        color = colors.background.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(6.dp)
                     )
                     .padding(horizontal = 12.dp, vertical = 6.dp)
@@ -161,7 +169,7 @@ private fun ScannerOverlay(
             Box(
                 modifier = Modifier
                     .size(280.dp)
-                    .background(Color.Black.copy(alpha = 0.25f), shape = RoundedCornerShape(20.dp))
+                    .background(colors.background.copy(alpha = 0.25f), shape = RoundedCornerShape(20.dp))
             ) {}
             // Esquinas gruesas y coloridas
             val cornerLength = 40.dp

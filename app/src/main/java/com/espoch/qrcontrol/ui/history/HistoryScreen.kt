@@ -36,8 +36,8 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    isDarkMode: Boolean,
-    userRole: String
+    userRole: String,
+    isDarkMode: Boolean
 ) {
     val colors = qrColors(isDarkMode)
     
@@ -86,8 +86,10 @@ fun HistoryScreen(
                 title = {
                     Text(
                         text = "Historial de Estacionamiento",
-                        color = colors.primary,
-                        fontWeight = FontWeight.Bold
+                        color = colors.text,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -172,12 +174,22 @@ private fun SearchBar(
     OutlinedTextField(
         value = searchQuery,
         onValueChange = onSearchQueryChange,
-        placeholder = { Text("Buscar por placa, usuario o espacio...") },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+        placeholder = { Text("Buscar por placa, usuario ...") },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Buscar",
+                tint = colors.text
+            )
+        },
         trailingIcon = {
             if (searchQuery.isNotEmpty()) {
                 IconButton(onClick = { onSearchQueryChange("") }) {
-                    Icon(Icons.Default.Clear, contentDescription = "Limpiar")
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Limpiar",
+                        tint = colors.text
+                    )
                 }
             }
         },
@@ -244,13 +256,13 @@ private fun StatisticCard(
         ) {
             Text(
                 text = value,
-                color = colors.primary,
+                color = colors.text,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = title,
-                color = colors.primary.copy(alpha = 0.7f),
+                color = colors.text.copy(alpha = 0.7f),
                 fontSize = 12.sp
             )
         }
@@ -283,7 +295,7 @@ private fun EmptyState(
             } else {
                 "No se encontraron resultados para '$searchQuery'"
             },
-            color = colors.primary.copy(alpha = 0.7f),
+            color = colors.text.copy(alpha = 0.7f),
             fontSize = 16.sp,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
@@ -331,7 +343,7 @@ private fun HistorialItem(
             ) {
                 Text(
                     text = historial.carId,
-                    color = colors.primary,
+                    color = colors.text,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -364,12 +376,12 @@ private fun HistorialItem(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Usuario: \n ${userNames[historial.userId] ?: historial.userId}",
-                        color = colors.primary.copy(alpha = 0.8f),
+                        color = colors.text.copy(alpha = 0.8f),
                         fontSize = 14.sp
                     )
                     Text(
                         text = "Espacio: ${historial.parkingSpotId}",
-                        color = colors.primary.copy(alpha = 0.8f),
+                        color = colors.text.copy(alpha = 0.8f),
                         fontSize = 14.sp
                     )
                 }
@@ -377,13 +389,13 @@ private fun HistorialItem(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Entrada: ${formatDate(historial.entryDate)}",
-                        color = colors.primary.copy(alpha = 0.8f),
+                        color = colors.text.copy(alpha = 0.8f),
                         fontSize = 14.sp
                     )
                     if (historial.exitDate.isNotEmpty()) {
                         Text(
                             text = "Salida: ${formatDate(historial.exitDate)}",
-                            color = colors.primary.copy(alpha = 0.8f),
+                            color = colors.text.copy(alpha = 0.8f),
                             fontSize = 14.sp
                         )
                     }
@@ -395,7 +407,7 @@ private fun HistorialItem(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Duración: ${calculateDuration(historial.entryDate, historial.exitDate)}",
-                    color = colors.primary.copy(alpha = 0.6f),
+                    color = colors.text.copy(alpha = 0.6f),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )

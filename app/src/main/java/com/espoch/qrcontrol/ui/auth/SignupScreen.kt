@@ -1,9 +1,13 @@
 package com.espoch.qrcontrol.ui.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,13 +15,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.espoch.qrcontrol.data.AuthRepository
 import com.espoch.qrcontrol.data.BasicValidations
 import com.espoch.qrcontrol.ui.theme.qrColors
-import kotlinx.coroutines.CoroutineScope
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.res.painterResource
+import com.espoch.qrcontrol.R
+import com.espoch.qrcontrol.ui.theme.QrColors
+
 
 /**
  * Pantalla de registro de nuevos usuarios
@@ -31,11 +38,10 @@ import kotlinx.coroutines.CoroutineScope
  * - Integración con Firebase Authentication
  * 
  * @param onLoginClick Función para navegar a la pantalla de login
- * @param isDarkMode Estado del tema oscuro/claro
  */
 @Composable
 fun SignupScreen(
-    onLoginClick: () -> Unit,
+    onLoginClick: () -> Unit = {},
     isDarkMode: Boolean
 ) {
     val colors = qrColors(isDarkMode)
@@ -116,6 +122,16 @@ fun SignupScreen(
             onLoginClick = onLoginClick,
             colors = colors
         )
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(colors.background.copy(alpha = 0.6f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = colors.primary, strokeWidth = 4.dp, modifier = Modifier.size(56.dp))
+            }
+        }
     }
 }
 
@@ -158,19 +174,30 @@ private fun SignupCard(
     isLoading: Boolean,
     onSignupClick: () -> Unit,
     onLoginClick: () -> Unit,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors
 ) {
+    val scrollState = rememberScrollState()
     Card(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(colors.primaryContainer),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 350.dp, max = 600.dp)
     ) {
         Column(
-            modifier = Modifier.padding(30.dp),
+            modifier = Modifier
+                .padding(horizontal = 20.dp, vertical = 18.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // Logo de la app
+            Image(
+                painter = painterResource(id = R.drawable.ic_logo),
+                contentDescription = "Logo QRControl",
+                modifier = Modifier.size(100.dp).padding(bottom = 8.dp)
+            )
             SignupTitle(colors)
             SignupForm(
                 name = name,
@@ -192,7 +219,8 @@ private fun SignupCard(
                     text = errorMessage,
                     color = colors.error,
                     modifier = Modifier.padding(vertical = 8.dp),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
             }
             SignupButton(
@@ -214,11 +242,11 @@ private fun SignupCard(
  * @param colors Colores del tema actual
  */
 @Composable
-private fun SignupTitle(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
+private fun SignupTitle(colors: QrColors) {
     Text(
         text = "Crea tu cuenta",
         style = MaterialTheme.typography.headlineMedium,
-        color = colors.primary,
+        color = colors.text,
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(bottom = 24.dp)
@@ -256,15 +284,17 @@ private fun SignupForm(
     emailError: String?,
     passwordError: String?,
     confirmError: String?,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors
 ) {
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmVisible by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = name,
         onValueChange = onNameChange,
         label = { Text("Nombre", color = colors.text) },
         singleLine = true,
         isError = nameError != null,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp)
     )
     if (nameError != null) {
         Text(
@@ -281,7 +311,7 @@ private fun SignupForm(
         label = { Text("Correo electrónico", color = colors.text) },
         singleLine = true,
         isError = emailError != null,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp)
     )
     if (emailError != null) {
         Text(
@@ -297,9 +327,17 @@ private fun SignupForm(
         onValueChange = onPasswordChange,
         label = { Text("Contraseña", color = colors.text) },
         singleLine = true,
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Text(
+                    text = if (passwordVisible) "👁️" else "🔒",
+                    fontSize = 20.sp
+                )
+            }
+        },
         isError = passwordError != null,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp)
     )
     if (passwordError != null) {
         Text(
@@ -315,9 +353,17 @@ private fun SignupForm(
         onValueChange = onConfirmChange,
         label = { Text("Confirmar contraseña", color = colors.text) },
         singleLine = true,
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (confirmVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            IconButton(onClick = { confirmVisible = !confirmVisible }) {
+                Text(
+                    text = if (confirmVisible) "👁️" else "🔒",
+                    fontSize = 20.sp
+                )
+            }
+        },
         isError = confirmError != null,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp)
     )
     if (confirmError != null) {
         Text(
@@ -341,7 +387,7 @@ private fun SignupForm(
 private fun SignupButton(
     onSignupClick: () -> Unit,
     isLoading: Boolean,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors
 ) {
     Column {
         Button(
@@ -359,15 +405,6 @@ private fun SignupButton(
                 fontWeight = FontWeight.Bold
             )
         }
-        
-        // Indicador de carga
-        if (isLoading) {
-            Text(
-                text = "Cargando...",
-                color = colors.onPrimary,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
     }
 }
 
@@ -380,7 +417,7 @@ private fun SignupButton(
 @Composable
 private fun LoginLink(
     onLoginClick: () -> Unit,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors
 ) {
     Row {
         Text(

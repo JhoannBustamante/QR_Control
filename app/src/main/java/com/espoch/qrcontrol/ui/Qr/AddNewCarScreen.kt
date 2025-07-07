@@ -1,21 +1,41 @@
 package com.espoch.qrcontrol.ui.Qr
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.espoch.qrcontrol.model.Cars
-import com.espoch.qrcontrol.ui.theme.qrColors
-import com.espoch.qrcontrol.data.ParkingRepository
 import com.espoch.qrcontrol.data.AuthRepository
-import kotlinx.coroutines.launch
+import com.espoch.qrcontrol.data.ParkingRepository
+import com.espoch.qrcontrol.model.Cars
 import kotlinx.coroutines.CoroutineScope
-import androidx.compose.ui.text.style.TextAlign
+import kotlinx.coroutines.launch
 
 // Data class para el estado del formulario
 private data class CarFormState(
@@ -37,14 +57,13 @@ private data class CarFormErrors(
 
 @Composable
 fun AddNewCarScreen(
-    isDarkMode: Boolean,
+    colors: com.espoch.qrcontrol.ui.theme.QrColors,
     onDismissRequest: () -> Unit,
     onCarAdded: (() -> Unit)? = null,
     carToEdit: Cars? = null,
     isEdit: Boolean = false,
     customTitle: String? = null
 ) {
-    val colors = qrColors(isDarkMode)
     var formState by remember {
         mutableStateOf(
             if (carToEdit != null) CarFormState(
@@ -190,7 +209,7 @@ private fun AddCarCard(
         ) {
             Text(
                 text = customTitle ?: if (isEdit) "Editar información del auto" else "Agregar nuevo Auto",
-                color = colors.primary,
+                color = colors.text,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -246,6 +265,7 @@ private fun CarFormFields(
         label = { Text("Nombre del Auto", color = colors.text) },
         singleLine = true,
         isError = formErrors.name != null,
+        textStyle = LocalTextStyle.current.copy(color = colors.text),
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
     )
     if (formErrors.name != null) {
@@ -263,6 +283,7 @@ private fun CarFormFields(
         label = { Text("Placa", color = colors.text) },
         singleLine = true,
         isError = formErrors.plate != null,
+        textStyle = LocalTextStyle.current.copy(color = colors.text),
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
     )
     if (formErrors.plate != null) {
@@ -280,6 +301,7 @@ private fun CarFormFields(
         label = { Text("Marca", color = colors.text) },
         singleLine = true,
         isError = formErrors.brand != null,
+        textStyle = LocalTextStyle.current.copy(color = colors.text),
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
     )
     if (formErrors.brand != null) {
@@ -297,6 +319,7 @@ private fun CarFormFields(
         label = { Text("Modelo", color = colors.text) },
         singleLine = true,
         isError = formErrors.model != null,
+        textStyle = LocalTextStyle.current.copy(color = colors.text),
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
     )
     if (formErrors.model != null) {
@@ -314,6 +337,7 @@ private fun CarFormFields(
         label = { Text("Color", color = colors.text) },
         singleLine = true,
         isError = formErrors.color != null,
+        textStyle = LocalTextStyle.current.copy(color = colors.text),
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
     )
     if (formErrors.color != null) {

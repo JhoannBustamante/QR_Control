@@ -1,5 +1,6 @@
 package com.espoch.qrcontrol.ui.Qr
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,24 +19,39 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import androidx.navigation.NavController
+import com.espoch.qrcontrol.ui.theme.QrColors
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.material3.LocalTextStyle
 
 @Composable
 fun QRRegisteredCarsScreen(
     navController: NavController,
     onDismissRequest: () -> Unit,
-    isDarkMode: Boolean,
     qrContent: String,
     onParkingAssignRequested: ((car: Cars) -> Unit)? = null,
-    onNavigateToParking: ((car: Cars) -> Unit)? = null
+    onNavigateToParking: ((car: Cars) -> Unit)? = null,
+    isDarkMode: Boolean
 ) {
     val colors = qrColors(isDarkMode)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     val carFromQR = remember(qrContent) { parseCarFromQR(qrContent) }
+    var carFromDB by remember { mutableStateOf<Cars?>(null) }
+
+    // Si hay placa, consulta la base de datos para obtener el auto completo
+    LaunchedEffect(carFromQR?.plate) {
+        carFromQR?.plate?.takeIf { it.isNotBlank() }?.let { plate ->
+            ParkingRepository.getCarByPlate(plate) { car ->
+                if (car != null) carFromDB = car
+            }
+        }
+    }
+
     var formState by remember {
         mutableStateOf(
-            carFromQR?.let { createFormStateFromCar(it) } ?: QRCarFormState()
+            (carFromDB ?: carFromQR)?.let { createFormStateFromCar(it) } ?: QRCarFormState()
         )
     }
 
@@ -63,7 +79,8 @@ fun QRRegisteredCarsScreen(
                 showParkingDialog = true
             },
             onCancel = onDismissRequest,
-            colors = colors
+            colors = colors,
+            car = (carFromDB ?: carFromQR) ?: Cars()
         )
     }
 
@@ -108,7 +125,7 @@ fun QRRegisteredCarsScreen(
                                     navController.navigate("home_screen") {
                                         popUpTo("home_screen") { inclusive = true }
                                     }
-                                    onParkingAssignRequested?.invoke(formState.toCar(carFromQR))
+                                    onParkingAssignRequested?.invoke(formState.toCar((carFromDB ?: carFromQR) ?: Cars()))
                                 }
                             )
                         }
@@ -208,8 +225,10 @@ private fun CarRegistrationCard(
     onFormStateChange: (QRCarFormState) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors,
+    car: Cars
 ) {
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     Card(
         colors = CardDefaults.cardColors(colors.surface),
         modifier = Modifier.fillMaxWidth(),
@@ -226,9 +245,20 @@ private fun CarRegistrationCard(
                 onValueChange = onFormStateChange,
                 colors = colors
             )
+            if (errorMessage != null) {
+                Text(errorMessage!!, color = colors.error, fontSize = 14.sp, modifier = Modifier.padding(bottom = 4.dp))
+            }
             FormButtons(
                 colors = colors,
-                onSave = onSave,
+                onSave = {
+                    // Validación de campos obligatorios
+                    if (formState.name.isBlank() || formState.plate.isBlank() || formState.brand.isBlank() || formState.model.isBlank() || formState.color.isBlank()) {
+                        errorMessage = "Completa todos los campos obligatorios."
+                    } else {
+                        errorMessage = null
+                        onSave()
+                    }
+                },
                 onCancel = onCancel
             )
         }
@@ -236,7 +266,7 @@ private fun CarRegistrationCard(
 }
 
 @Composable
-private fun RegistrationTitle(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
+private fun RegistrationTitle(colors: QrColors) {
     Text(
         text = "Registrar Ingreso de Auto",
         color = colors.primary,
@@ -250,7 +280,7 @@ private fun RegistrationTitle(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
 private fun CarFormFields(
     formState: QRCarFormState,
     onValueChange: (QRCarFormState) -> Unit,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors
 ) {
     Column {
         FormField(
@@ -297,13 +327,14 @@ private fun FormField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label, color = colors.text) },
         singleLine = true,
+        textStyle = LocalTextStyle.current.copy(color = colors.text),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
@@ -312,7 +343,7 @@ private fun FormField(
 
 @Composable
 private fun FormButtons(
-    colors: com.espoch.qrcontrol.ui.theme.QrColors,
+    colors: QrColors,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {

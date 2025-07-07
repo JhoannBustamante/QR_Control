@@ -1,23 +1,28 @@
 package com.espoch.qrcontrol.ui.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.espoch.qrcontrol.R
 import com.espoch.qrcontrol.data.AuthRepository
 import com.espoch.qrcontrol.data.BasicValidations
 import com.espoch.qrcontrol.ui.theme.qrColors
-import kotlinx.coroutines.CoroutineScope
 
 /**
  * Pantalla de inicio de sesión
@@ -31,12 +36,12 @@ import kotlinx.coroutines.CoroutineScope
  * 
  * @param onRegisterClick Función para navegar a la pantalla de registro
  * @param navegationToHome Función para navegar a la pantalla principal después del login exitoso
- * @param isDarkMode Estado del tema oscuro/claro
+ * @param isDarkMode Booleano para determinar si el tema es oscuro
  */
 @Composable
 fun LoginScreen(
     onRegisterClick: () -> Unit = {},
-    navegationToHome: () -> Unit = {},
+    navegationToHome: () -> Unit,
     isDarkMode: Boolean
 ) {
     val colors = qrColors(isDarkMode)
@@ -97,6 +102,16 @@ fun LoginScreen(
             onRegisterClick = onRegisterClick,
             colors = colors
         )
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(colors.background.copy(alpha = 0.6f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = colors.primary, strokeWidth = 4.dp, modifier = Modifier.size(56.dp))
+            }
+        }
     }
 }
 
@@ -140,6 +155,12 @@ private fun LoginCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            // Logo de la app
+            Image(
+                painter = painterResource(id = R.drawable.ic_logo),
+                contentDescription = "Logo QRControl",
+                modifier = Modifier.size(100.dp).padding(bottom = 8.dp)
+            )
             LoginTitle(colors)
             LoginForm(
                 email = email,
@@ -155,7 +176,8 @@ private fun LoginCard(
                     text = errorMessage,
                     color = colors.error,
                     modifier = Modifier.padding(vertical = 8.dp),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
             }
             LoginButton(
@@ -181,7 +203,7 @@ private fun LoginTitle(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
     Text(
         text = "Iniciar sesión",
         style = MaterialTheme.typography.headlineMedium,
-        color = colors.primary,
+        color = colors.text,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(bottom = 24.dp)
     )
@@ -208,6 +230,7 @@ private fun LoginForm(
     passwordError: String?,
     colors: com.espoch.qrcontrol.ui.theme.QrColors
 ) {
+    var passwordVisible by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = email,
         onValueChange = onEmailChange,
@@ -232,7 +255,15 @@ private fun LoginForm(
         onValueChange = onPasswordChange,
         label = { Text("Contraseña", color = colors.text) },
         singleLine = true,
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Text(
+                    text = if (passwordVisible) "👁️" else "🔒",
+                    fontSize = 20.sp
+                )
+            }
+        },
         isError = passwordError != null,
         modifier = Modifier
             .fillMaxWidth()
@@ -276,15 +307,6 @@ private fun LoginButton(
                 text = "Iniciar sesión",
                 color = colors.onPrimary,
                 fontWeight = FontWeight.Bold
-            )
-        }
-        
-        // Indicador de carga
-        if (isLoading) {
-            Text(
-                text = "Cargando...",
-                color = colors.onPrimary,
-                modifier = Modifier.padding(vertical = 8.dp)
             )
         }
     }

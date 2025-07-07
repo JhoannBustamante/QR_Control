@@ -6,10 +6,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,13 +23,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.espoch.qrcontrol.R
 import com.espoch.qrcontrol.data.AuthRepository
 import com.espoch.qrcontrol.ui.Custom.GeneralButton
 import com.espoch.qrcontrol.ui.theme.qrColors
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import androidx.compose.runtime.LaunchedEffect
 
 /**
  * Pantalla de bienvenida y punto de entrada de la aplicación
@@ -34,14 +40,13 @@ import androidx.compose.runtime.LaunchedEffect
  * - Navegar a la pantalla de registro
  * 
  * @param onLoginClick Función para navegar a la pantalla de login
- * @param isDarkMode Estado del tema oscuro/claro
  * @param onLoginSuccessGoogle Función llamada cuando el login con Google es exitoso
  */
 @Composable
 fun StartScreen(
     onLoginClick: () -> Unit = {},
-    isDarkMode: Boolean,
-    onLoginSuccessGoogle: () -> Unit
+    onLoginSuccessGoogle: () -> Unit,
+    isDarkMode: Boolean
 ) {
     val context = LocalContext.current
     val colors = qrColors(isDarkMode)
@@ -53,8 +58,9 @@ fun StartScreen(
         }
     }
     
+    var isLoadingGoogle by remember { mutableStateOf(false) }
     // Configuración del launcher para Google Sign-In
-    val launcher = rememberGoogleSignInLauncher(context, onLoginSuccessGoogle, colors)
+    val launcher = rememberGoogleSignInLauncher(context, onLoginSuccessGoogle, colors, onLoading = { isLoadingGoogle = it })
     val googleSignInClient = createGoogleSignInClient(context)
 
     // Contenedor principal con fondo y centrado
@@ -68,9 +74,25 @@ fun StartScreen(
         // Tarjeta de bienvenida con logo y botones de autenticación
         WelcomeCard(
             onLoginClick = onLoginClick,
-            onGoogleSignIn = { launcher.launch(googleSignInClient.signInIntent) },
+            onGoogleSignIn = {
+                isLoadingGoogle = true
+                launcher.launch(googleSignInClient.signInIntent)
+            },
             colors = colors
         )
+        // Spinner de carga modal
+        if (isLoadingGoogle) {
+            Dialog(onDismissRequest = {}) {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(colors.surface, shape = RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = colors.primary)
+                }
+            }
+        }
     }
 }
 
@@ -108,9 +130,9 @@ private fun WelcomeCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(30.dp),
+            modifier = Modifier.padding(36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
             AppLogo()
             WelcomeTitle(colors)
@@ -187,16 +209,18 @@ private fun LoginButtons(
  * @param context Contexto de la aplicación
  * @param onLoginSuccessGoogle Función llamada cuando el login es exitoso
  * @param colors Colores del tema actual
+ * @param onLoading Función para manejar el estado de carga
  * @return Launcher configurado para Google Sign-In
  */
 @Composable
 private fun rememberGoogleSignInLauncher(
     context: android.content.Context,
     onLoginSuccessGoogle: () -> Unit,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: com.espoch.qrcontrol.ui.theme.QrColors,
+    onLoading: (Boolean) -> Unit
 ): androidx.activity.result.ActivityResultLauncher<android.content.Intent> {
     return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        handleGoogleSignInResult(result, context, onLoginSuccessGoogle)
+        handleGoogleSignInResult(result, context, onLoginSuccessGoogle, onLoading)
     }
 }
 
@@ -206,27 +230,32 @@ private fun rememberGoogleSignInLauncher(
  * @param result Resultado de la actividad de Google Sign-In
  * @param context Contexto de la aplicación
  * @param onLoginSuccessGoogle Función llamada cuando el login es exitoso
+ * @param onLoading Función para manejar el estado de carga
  */
 private fun handleGoogleSignInResult(
     result: androidx.activity.result.ActivityResult,
     context: android.content.Context,
-    onLoginSuccessGoogle: () -> Unit
+    onLoginSuccessGoogle: () -> Unit,
+    onLoading: (Boolean) -> Unit
 ) {
     val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
     try {
         val account = task.result
         val idToken = account.idToken
         if (idToken != null) {
-            // Autentica con el servidor usando el token de Google
             AuthRepository.AuthWithGoogle(idToken) { success, error, role ->
+                onLoading(false)
                 if (success) {
                     onLoginSuccessGoogle()
                 } else {
                     Toast.makeText(context, error ?: "Error con Google", Toast.LENGTH_SHORT).show()
                 }
             }
+        } else {
+            onLoading(false)
         }
     } catch (e: Exception) {
+        onLoading(false)
         Toast.makeText(context, "Fallo Google Sign-In", Toast.LENGTH_SHORT).show()
     }
 }

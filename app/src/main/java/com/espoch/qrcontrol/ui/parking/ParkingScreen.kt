@@ -3,11 +3,13 @@ package com.espoch.qrcontrol.ui.parking
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.espoch.qrcontrol.ui.theme.qrColors
-import androidx.compose.ui.tooling.preview.Preview
 import com.espoch.qrcontrol.model.ParkingSpot
 import com.espoch.qrcontrol.data.ParkingRepository
 import androidx.compose.runtime.getValue
@@ -37,21 +38,30 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.window.Dialog
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.ui.graphics.Color
+import com.espoch.qrcontrol.ui.theme.QrColors
+
 @Composable
-fun ParkingScreen(
-    isDarkMode: Boolean,
+fun ParkingScreen (
     carToAssign: Cars? = null,
-    userRole: String = "user",
-    onParkingAssigned: (() -> Unit)? = null
+    onParkingAssigned: (() -> Unit)? = null,
+    isDarkMode: Boolean
 ) {
     val colors = qrColors(isDarkMode)
     var spots by remember { mutableStateOf<List<ParkingSpot>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    var isAssigning by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         ParkingRepository.getParkingSpots { fetchedSpots ->
             spots = fetchedSpots.sortedBy { it.id }
+            isLoading = false
         }
     }
 
@@ -63,36 +73,62 @@ fun ParkingScreen(
         containerColor = colors.background,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        ParkingContent(
-            spots = spots,
-            colors = colors,
-            carToAssign = carToAssign,
-            userRole = userRole,
-            onSpotSelected = { spotId ->
-                if (carToAssign != null) {
-                    handleAssignSpot(
-                        spotId = spotId,
-                        car = carToAssign,
-                        scope = scope,
-                        snackbarHostState = snackbarHostState,
-                        onParkingAssigned = onParkingAssigned
-                    )
+        if (isLoading) {
+            ParkingSkeleton(colors)
+        } else {
+            ParkingContent(
+                spots = spots,
+                colors = colors,
+                carToAssign = carToAssign,
+                onSpotSelected = { spotId ->
+                    if (carToAssign != null) {
+                        if (carToAssign.parkingId != 0) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Este auto ya está ocupando un espacio de estacionamiento.")
+                            }
+                        } else {
+                            isAssigning = true
+                            handleAssignSpot(
+                                spotId = spotId,
+                                car = carToAssign,
+                                scope = scope,
+                                snackbarHostState = snackbarHostState,
+                                onParkingAssigned = {
+                                    isAssigning = false
+                                    onParkingAssigned?.invoke()
+                                },
+                                onAssignFinished = { isAssigning = false }
+                            )
+                        }
+                    }
+                },
+                available = available,
+                occupied = occupied,
+                reserved = reserved,
+                innerPadding = innerPadding
+            )
+        }
+        // Spinner de carga modal
+        if (isAssigning) {
+            Dialog(onDismissRequest = {}) {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(colors.surface, shape = RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = colors.primary)
                 }
-            },
-            available = available,
-            occupied = occupied,
-            reserved = reserved,
-            innerPadding = innerPadding
-        )
+            }
+        }
     }
 }
 
 @Composable
 private fun ParkingContent(
     spots: List<ParkingSpot>,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors,
+    colors: QrColors,
     carToAssign: Cars?,
-    userRole: String,
     onSpotSelected: (Int) -> Unit,
     available: Int,
     occupied: Int,
@@ -110,15 +146,15 @@ private fun ParkingContent(
         // Header con título e icono
         ParkingHeader(colors)
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         
         // Resumen de estado mejorado
         EnhancedParkingStatusSummary(available, occupied, reserved, colors)
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         
         // Mapa de plazas con título mejorado
-        ParkingMapSection(spots, colors, carToAssign, userRole, onSpotSelected)
+        ParkingMapSection(spots, colors, carToAssign, onSpotSelected)
     }
 }
 
@@ -127,7 +163,8 @@ private fun handleAssignSpot(
     car: Cars,
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
-    onParkingAssigned: (() -> Unit)?
+    onParkingAssigned: (() -> Unit)?,
+    onAssignFinished: (() -> Unit)? = null
 ) {
     scope.launch {
         ParkingRepository.updateParkingSpot(spotId, "ocupado", car.plate) { success, error ->
@@ -154,15 +191,18 @@ private fun handleAssignSpot(
                                         } else {
                                             snackbarHostState.showSnackbar("Error al actualizar auto: $carError")
                                         }
+                                        onAssignFinished?.invoke()
                                     }
                                 }
                             } else {
                                 snackbarHostState.showSnackbar("Error al crear historial: $hError")
+                                onAssignFinished?.invoke()
                             }
                         }
                     }
                 } else {
                     snackbarHostState.showSnackbar("Error al asignar espacio: $error")
+                    onAssignFinished?.invoke()
                 }
             }
         }
@@ -178,13 +218,13 @@ private fun ParkingHeader(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
         Icon(
             imageVector = Icons.Default.Place,
             contentDescription = "Estacionamiento",
-            tint = colors.primary,
+            tint = colors.text,
             modifier = Modifier.size(32.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = "Estacionamiento",
-            color = colors.primary,
+            color = colors.text,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
@@ -208,7 +248,7 @@ private fun EnhancedParkingStatusSummary(available: Int, occupied: Int, reserved
         ) {
             Text(
                 text = "Estado del Estacionamiento",
-                color = colors.primary,
+                color = colors.text,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -226,7 +266,7 @@ private fun EnhancedParkingStatusSummary(available: Int, occupied: Int, reserved
                     count = available,
                     icon = Icons.Default.CheckCircle,
                     color = colors.accentContainer,
-                    textColor = colors.primary,
+                    textColor = colors.text,
                     modifier = Modifier.weight(1f)
                 )
                 
@@ -235,9 +275,9 @@ private fun EnhancedParkingStatusSummary(available: Int, occupied: Int, reserved
                 EnhancedStatusCard(
                     title = "Ocupados",
                     count = occupied,
-                    icon = Icons.Default.Clear,
+                    icon = Icons.Default.Lock,
                     color = colors.error,
-                    textColor = colors.onPrimary,
+                    textColor = colors.text,
                     modifier = Modifier.weight(1f)
                 )
                 
@@ -246,9 +286,9 @@ private fun EnhancedParkingStatusSummary(available: Int, occupied: Int, reserved
                 EnhancedStatusCard(
                     title = "Reservados",
                     count = reserved,
-                    icon = Icons.Default.Lock,
+                    icon = Icons.Default.DateRange,
                     color = colors.secondaryContainer,
-                    textColor = colors.primary,
+                    textColor = colors.text,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -261,8 +301,8 @@ private fun EnhancedStatusCard(
     title: String,
     count: Int,
     icon: ImageVector,
-    color: androidx.compose.ui.graphics.Color,
-    textColor: androidx.compose.ui.graphics.Color,
+    color: Color,
+    textColor: Color,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -303,9 +343,8 @@ private fun EnhancedStatusCard(
 @Composable
 private fun ParkingMapSection(
     spots: List<ParkingSpot>,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors,
+    colors: QrColors,
     carToAssign: Cars?,
-    userRole: String,
     onSpotSelected: (Int) -> Unit
 ) {
     Card(
@@ -329,22 +368,22 @@ private fun ParkingMapSection(
                 Icon(
                     imageVector = Icons.Default.Place,
                     contentDescription = "Mapa",
-                    tint = colors.primary,
+                    tint = colors.text,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Mapa de Plazas",
-                    color = colors.primary,
+                    text = "Mapa de Plaza",
+                    color = colors.text,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Grid de plazas compacto
-            EnhancedParkingSpotGrid(spots, colors, carToAssign, userRole, onSpotSelected)
+            EnhancedParkingSpotGrid(spots, colors, carToAssign, onSpotSelected)
         }
     }
 }
@@ -352,41 +391,29 @@ private fun ParkingMapSection(
 @Composable
 private fun EnhancedParkingSpotGrid(
     spots: List<ParkingSpot>,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors,
+    colors: QrColors,
     carToAssign: Cars?,
-    userRole: String,
     onSpotSelected: (Int) -> Unit
 ) {
-    // Organizar espacios en filas de 8 para mejor visualización
-    val columns = 8
-    val rows = (spots.size + columns - 1) / columns // Redondear hacia arriba
-    
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    // Grid compacto sin separaciones
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 75.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        repeat(rows) { rowIndex ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                repeat(columns) { colIndex ->
-                    val spotIndex = rowIndex * columns + colIndex
-                    if (spotIndex < spots.size) {
-                        CompactParkingSpot(
-                            spot = spots[spotIndex],
-                            colors = colors,
-                            carToAssign = carToAssign,
-                            userRole = userRole,
-                            onSpotSelected = onSpotSelected,
-                            modifier = Modifier.weight(1f)
-                        )
-                    } else {
-                        // Espacio vacío para mantener el layout
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
+        items(spots) { spot ->
+            CompactParkingSpot(
+                spot = spot,
+                colors = colors,
+                carToAssign = carToAssign,
+                onSpotSelected = onSpotSelected,
+                modifier = Modifier
+                    .width(40.dp)
+                    .height(28.dp)
+            )
         }
     }
 }
@@ -396,7 +423,6 @@ private fun CompactParkingSpot(
     spot: ParkingSpot,
     colors: com.espoch.qrcontrol.ui.theme.QrColors,
     carToAssign: Cars?,
-    userRole: String,
     onSpotSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -418,12 +444,11 @@ private fun CompactParkingSpot(
     
     Card(
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(6.dp),
         modifier = modifier
-            .size(40.dp)
             .shadow(
                 elevation = if (isAvailable) 6.dp else 2.dp,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(6.dp)
             )
             .let { if (isAvailable) it.clickable { onSpotSelected(spot.id) } else it },
         elevation = CardDefaults.cardElevation(
@@ -436,35 +461,75 @@ private fun CompactParkingSpot(
                 .padding(2.dp),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = spot.id.toString(),
-                    color = textColor,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                if (spot.estado == "ocupado") {
-                    Text(
-                        text = if (userRole == "supervisor") spot.plate else "O",
-                        color = textColor,
-                        fontSize = 6.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1
-                    )
-                }
-            }
+            Text(
+                text = spot.id.toString(),
+                color = textColor,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
 
-
-
-@Preview
 @Composable
-fun ParkingScreenPreview() {
-    ParkingScreen(isDarkMode = false)
+private fun ParkingSkeleton(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Header skeleton
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier.size(32.dp).background(colors.primary.copy(alpha = 0.15f), CircleShape)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Box(
+                modifier = Modifier
+                    .height(24.dp)
+                    .width(120.dp)
+                    .background(colors.primary.copy(alpha = 0.15f), RoundedCornerShape(6.dp))
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        // Estado resumen skeleton
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            repeat(3) {
+                Box(
+                    modifier = Modifier
+                        .height(60.dp)
+                        .width(90.dp)
+                        .background(colors.primary.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        // Grid de plazas skeleton
+        repeat(3) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                repeat(8) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(colors.primary.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+        Spacer(modifier = Modifier.height(32.dp))
+        CircularProgressIndicator(color = colors.primary, strokeWidth = 4.dp, modifier = Modifier.size(48.dp))
+    }
 }
+

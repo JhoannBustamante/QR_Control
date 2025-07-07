@@ -12,11 +12,11 @@ package com.espoch.qrcontrol.model
  * Los datos se sincronizan con Firebase Authentication y Firestore
  */
 data class user(
-    val id: String, // Identificador único del usuario (UID de Firebase Authentication)
-    val name: String, // Nombre completo del usuario
-    val email: String, // Correo electrónico del usuario (usado para login)
-    val password: String, // Contraseña del usuario (UID generado por Firebase Auth)
-    val role: String, // Rol del usuario: "supervisor" (administrador) o "user" (usuario normal)
-    val createdAt: String, // Fecha de creación del usuario en formato ISO
-    val updatedAt: String // Fecha de última actualización del usuario en formato ISO
+    val id: String = "",
+    val name: String = "",
+    val email: String = "",
+    val password: String = "",
+    val role: String = "",
+    val createdAt: String = "",
+    val updatedAt: String = ""
 )

@@ -15,11 +15,16 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults.cardColors
-import androidx.compose.material3.CardDefaults.elevatedCardElevation
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -28,25 +33,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.espoch.qrcontrol.model.Cars
-import com.espoch.qrcontrol.ui.theme.qrColors
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import com.espoch.qrcontrol.data.ParkingRepository
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
 import com.espoch.qrcontrol.ui.theme.QrColors
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun CarsScreenSupervisor(
     car: Cars,
-    isDarkMode: Boolean,
+    colors: QrColors
 ) {
-    val colors = qrColors(isDarkMode)
     val scope = rememberCoroutineScope()
     var message by remember { mutableStateOf("") }
     var entryDate by remember { mutableStateOf("") }
@@ -62,9 +59,9 @@ fun CarsScreenSupervisor(
     }
 
     Card(
-        colors = cardColors(colors.surface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         modifier = Modifier.fillMaxWidth(),
-        elevation = elevatedCardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -112,12 +109,13 @@ private fun CarSupervisorTitle(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("Placa: ${car.plate}",
-            color = colors.primary.copy(alpha = 0.9f),
+        Text("${car.plate}",
+            color = colors.text,
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Start,
-            modifier = Modifier.weight(1f)        )
+            modifier = Modifier.weight(1f)
+        )
 
         Icon(
             imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
@@ -140,19 +138,19 @@ private fun CarSupervisorInfoRow(car: Cars, colors: QrColors, entryDate: String)
         ) {
             Text(
                 "Hora de entrada: ${if (entryDate.isNotEmpty()) extractTimeFromDate(entryDate) else "-"}",
-                color = colors.primary.copy(alpha = 0.7f),
+                color = colors.text,
                 fontSize = 14.sp
             )
-            Text("Marca: ${car.brand}", color = colors.primary.copy(alpha = 0.7f), fontSize = 14.sp)
-            Text("Color: ${car.color}", color = colors.primary.copy(alpha = 0.7f), fontSize = 14.sp)
+            Text("Marca: ${car.brand}", color = colors.text, fontSize = 14.sp)
+            Text("Color: ${car.color}", color = colors.text, fontSize = 14.sp)
             Text(
                 "Modelo: ${car.model}",
-                color = colors.primary.copy(alpha = 0.7f),
+                color = colors.text,
                 fontSize = 14.sp
             )
             Text(
                 "Propietario: ${car.ownerName}",
-                color = colors.primary.copy(alpha = 0.7f),
+                color = colors.text,
                 fontSize = 14.sp
             )
         }

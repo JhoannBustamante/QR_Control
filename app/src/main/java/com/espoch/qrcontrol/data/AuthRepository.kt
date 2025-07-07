@@ -302,6 +302,71 @@ object AuthRepository {
             }
             .addOnFailureListener { onResult(null) }
     }
+
+    /**
+     * Verifica si el usuario actual tiene el email verificado
+     */
+    fun isCurrentUserEmailVerified(): Boolean {
+        return auth.currentUser?.isEmailVerified == true
+    }
+
+    /**
+     * Envía un correo de verificación al usuario actual
+     */
+    fun sendEmailVerification(onResult: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+        if (user != null) {
+            user.sendEmailVerification()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        onResult(true, null)
+                    } else {
+                        onResult(false, task.exception?.localizedMessage ?: "Error al enviar correo de verificación")
+                    }
+                }
+        } else {
+            onResult(false, "No hay usuario autenticado")
+        }
+    }
+
+    /**
+     * Envía un correo de restablecimiento de contraseña al usuario actual
+     */
+    fun sendPasswordResetEmail(onResult: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+        val email = user?.email
+        if (email != null) {
+            auth.sendPasswordResetEmail(email)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        onResult(true, null)
+                    } else {
+                        onResult(false, task.exception?.localizedMessage ?: "Error al enviar correo de restablecimiento")
+                    }
+                }
+        } else {
+            onResult(false, "No hay email disponible para restablecer contraseña")
+        }
+    }
+
+    /**
+     * Cambia el email del usuario actual
+     */
+    fun changeUserEmail(newEmail: String, onResult: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+        if (user != null) {
+            user.updateEmail(newEmail)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        onResult(true, null)
+                    } else {
+                        onResult(false, task.exception?.localizedMessage ?: "Error al cambiar el correo electrónico")
+                    }
+                }
+        } else {
+            onResult(false, "No hay usuario autenticado")
+        }
+    }
 }
 
 /**

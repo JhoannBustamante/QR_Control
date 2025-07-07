@@ -19,6 +19,7 @@ import com.espoch.qrcontrol.ui.theme.QRControlTheme
 import com.espoch.qrcontrol.ui.Qr.QRScannerScreen
 import com.espoch.qrcontrol.ui.Qr.QRRegisteredCarsScreen
 import com.espoch.qrcontrol.ui.history.HistoryScreen
+import com.espoch.qrcontrol.ui.profile.ProfileScreen
 import com.google.gson.Gson
 import com.espoch.qrcontrol.model.Cars
 import com.espoch.qrcontrol.ui.parking.ParkingScreen
@@ -43,6 +44,7 @@ object Screens {
     const val Settings = "settings_screen"     // Configuraciones
     const val AddNewCar = "add_new_car_screen" // Agregar nuevo vehículo
     const val History = "history_screen"       // Historial de estacionamiento (solo supervisores)
+    const val Profile = "profile_screen"       // Perfil del usuario
 }
 
 /**
@@ -53,7 +55,6 @@ object Screens {
  * 2. Login/Signup → Home (pantalla principal)
  * 3. Home → QR Scanner → QR Registered Cars → Parking
  * 
- * @param isDarkMode Estado del tema oscuro/claro
  * @param onToggleDarkMode Función para cambiar el tema
  */
 @Composable
@@ -84,21 +85,20 @@ fun NavGraph(isDarkMode: Boolean, onToggleDarkMode: () -> Unit) {
         composable(Screens.Start) {
             StartScreen(
                 onLoginClick = { navController.navigate(Screens.Login) { launchSingleTop = true } },
-                isDarkMode = isDarkMode,
                 onLoginSuccessGoogle = {
                     // Navega a Home y limpia el stack de navegación
                     navController.navigate(Screens.Home) {
                         popUpTo(Screens.Start) { inclusive = true }
                         launchSingleTop = true
                     }
-                }
+                },
+                isDarkMode = isDarkMode
             )
         }
         
         // Pantalla de inicio de sesión
         composable(Screens.Login) {
             LoginScreen(
-                isDarkMode = isDarkMode,
                 onRegisterClick = { navController.navigate(Screens.Signup) { launchSingleTop = true } },
                 navegationToHome = {
                     // Navega a Home después del login exitoso
@@ -106,15 +106,16 @@ fun NavGraph(isDarkMode: Boolean, onToggleDarkMode: () -> Unit) {
                         popUpTo(Screens.Start) { inclusive = true }
                         launchSingleTop = true
                     }
-                }
+                },
+                isDarkMode = isDarkMode
             )
         }
         
         // Pantalla de registro
         composable(Screens.Signup) {
             SignupScreen(
-                isDarkMode = isDarkMode,
-                onLoginClick = { navController.navigate(Screens.Login) { launchSingleTop = true } }
+                onLoginClick = { navController.navigate(Screens.Login) { launchSingleTop = true } },
+                isDarkMode = isDarkMode
             )
         }
         
@@ -131,7 +132,8 @@ fun NavGraph(isDarkMode: Boolean, onToggleDarkMode: () -> Unit) {
                     val encoded = URLEncoder.encode(qrContent, "UTF-8")
                     navController.navigate("qr_registered_cars_screen/$encoded")
                 },
-                onDismiss = { navController.popBackStack() }
+                onDismiss = { navController.popBackStack() },
+                isDarkMode = isDarkMode
             )
         }
         
@@ -142,13 +144,13 @@ fun NavGraph(isDarkMode: Boolean, onToggleDarkMode: () -> Unit) {
             QRRegisteredCarsScreen(
                 navController = navController,
                 onDismissRequest = { navController.popBackStack() },
-                isDarkMode = isDarkMode,
                 qrContent = qrContent,
                 onNavigateToParking = { car ->
                     // Serializa el vehículo seleccionado para pasarlo a la pantalla de parking
                     val carJson = URLEncoder.encode(Gson().toJson(car), "UTF-8")
                     navController.navigate("parking_screen/$carJson")
-                }
+                },
+                isDarkMode = isDarkMode
             )
         }
         
@@ -157,17 +159,26 @@ fun NavGraph(isDarkMode: Boolean, onToggleDarkMode: () -> Unit) {
             val carJson = backStackEntry.arguments?.getString("carJson") ?: ""
             val car = Gson().fromJson(carJson, Cars::class.java)
             ParkingScreen(
-                isDarkMode = isDarkMode,
                 carToAssign = car,
-                onParkingAssigned = { navController.navigate(Screens.Home) }
+                onParkingAssigned = { navController.navigate(Screens.Home) },
+                isDarkMode = isDarkMode
             )
         }
         
         // Pantalla de historial de estacionamiento (solo para supervisores)
         composable(Screens.History) {
             HistoryScreen(
+                userRole = AuthRepository.getLocalUserRole(),
+                isDarkMode = isDarkMode
+            )
+        }
+        
+        // Pantalla de perfil del usuario
+        composable(Screens.Profile) {
+            ProfileScreen(
+                navController = navController,
                 isDarkMode = isDarkMode,
-                userRole = AuthRepository.getLocalUserRole()
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

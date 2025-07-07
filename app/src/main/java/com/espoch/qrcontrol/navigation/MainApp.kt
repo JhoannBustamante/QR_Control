@@ -33,7 +33,6 @@ import java.net.URLDecoder
  * - Gestión del estado del vehículo seleccionado para parking
  * 
  * @param navController Controlador de navegación principal
- * @param isDarkMode Estado del tema oscuro/claro
  * @param onToggleDarkMode Función para cambiar el tema
  */
 @Composable
@@ -62,9 +61,9 @@ fun MainApp(
     Scaffold(
         bottomBar = {
             BottomNavBar(
-                isDarkMode = isDarkMode,
                 navController = bottomNavController,
-                items = items
+                items = items,
+                isDarkMode = isDarkMode
             )
         }
     ) { innerPadding ->
@@ -77,27 +76,28 @@ fun MainApp(
             // Pantalla principal - Muestra información del usuario y opciones principales
             composable(Screens.Home) {
                 HomeScreen(
-                    isDarkMode = isDarkMode,
-                    navController = navController
+                    navController = navController,
+                    isDarkMode = isDarkMode
                 )
             }
             
             // Pantalla de gestión de estacionamiento
             composable(Screens.Parking) {
                 ParkingScreen(
-                    isDarkMode = isDarkMode, 
-                    carToAssign = carToAssignParking
-                ) { 
-                    carToAssignParking = null 
-                }
+                    carToAssign = carToAssignParking,
+                    onParkingAssigned = { 
+                        carToAssignParking = null 
+                    },
+                    isDarkMode = isDarkMode
+                )
             }
             
             // Pantalla de configuraciones
             composable(Screens.Settings) {
                 SettingsScreen(
                     navController = navController,
-                    isDarkMode = isDarkMode,
                     onToggleDarkMode = onToggleDarkMode,
+                    isDarkMode = isDarkMode,
                     username = "Usuario",
                     role = "user",
                     email = "sdfd")
@@ -106,8 +106,8 @@ fun MainApp(
             // Pantalla de historial de estacionamiento (solo para supervisores)
             composable(Screens.History) {
                 HistoryScreen(
-                    isDarkMode = isDarkMode,
-                    userRole = userRole
+                    userRole = userRole,
+                    isDarkMode = isDarkMode
                 )
             }
             
@@ -118,13 +118,12 @@ fun MainApp(
                 QRRegisteredCarsScreen(
                     navController = navController,
                     onDismissRequest = { navController.popBackStack() },
-                    isDarkMode = isDarkMode,
                     qrContent = qrContent,
                     onParkingAssignRequested = { car ->
-                        // Asigna el vehículo seleccionado y navega a parking
                         carToAssignParking = car
                         navController.navigate(Screens.Parking)
-                    }
+                    },
+                    isDarkMode = isDarkMode
                 )
             }
         }

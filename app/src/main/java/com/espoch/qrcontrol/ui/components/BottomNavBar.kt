@@ -13,6 +13,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.espoch.qrcontrol.R
 import com.espoch.qrcontrol.navigation.Screens
 import com.espoch.qrcontrol.ui.theme.qrColors
+import androidx.compose.ui.text.font.FontWeight
 
 /**
  * Barra de navegación inferior de la aplicación
@@ -28,15 +29,14 @@ import com.espoch.qrcontrol.ui.theme.qrColors
  * - Indicador visual de la pantalla actual
  * - Soporte para tema oscuro/claro
  * 
- * @param isDarkMode Estado del tema oscuro/claro
  * @param navController Controlador de navegación
  * @param items Lista de pantallas disponibles en la barra
  */
 @Composable
 fun BottomNavBar(
-    isDarkMode: Boolean,
     navController: NavHostController,
-    items: List<String>
+    items: List<String>,
+    isDarkMode: Boolean
 ) {
     val colors = qrColors(isDarkMode)
     
@@ -56,13 +56,25 @@ fun BottomNavBar(
                 Screens.Home -> R.drawable.ic_home to "Inicio"
                 Screens.Parking -> R.drawable.ic_parking to "Parqueadero"
                 Screens.History -> R.drawable.ic_history to "Historial"
-                Screens.Settings -> R.drawable.ic_settings to "Settings"
+                Screens.Settings -> R.drawable.ic_settings to "Ajustes"
                 else -> R.drawable.ic_home to screen
             }
 
             NavigationBarItem(
-                icon = { Icon(painter = painterResource(id = iconRes), contentDescription = label) },
-                label = { Text(label, color = colors.text)  },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = iconRes),
+                        contentDescription = label,
+                        tint = if (selected) colors.onSecondary else colors.text
+                    )
+                },
+                label = {
+                    Text(
+                        text = label,
+                        color = if (selected) colors.onSecondary else colors.text,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
                 selected = selected,
                 onClick = {
                     // Solo navega si no estamos ya en esa pantalla

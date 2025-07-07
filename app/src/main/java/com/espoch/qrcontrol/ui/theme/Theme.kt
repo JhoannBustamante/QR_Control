@@ -1,49 +1,12 @@
 package com.espoch.qrcontrol.ui.theme
 
-import android.app.Activity
-import android.os.Build
+
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.ColorScheme
-
-/**
- * Esquema de colores para el tema oscuro (no utilizado actualmente)
- * 
- * Define los colores por defecto para el modo oscuro de Material Design 3
- */
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-/**
- * Esquema de colores para el tema claro (no utilizado actualmente)
- * 
- * Define los colores por defecto para el modo claro de Material Design 3
- */
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
 
 /**
  * Tema principal de la aplicación QRControl
@@ -85,7 +48,7 @@ fun QRControlTheme(
  * @return ColorScheme configurado con la paleta personalizada
  */
 @Composable
-private fun customColorScheme(isDark: Boolean): androidx.compose.material3.ColorScheme {
+private fun customColorScheme(isDark: Boolean): ColorScheme {
     val colors = qrColors(isDark)
     return if (isDark) {
         // Esquema de colores para modo oscuro
@@ -117,7 +80,7 @@ private fun customColorScheme(isDark: Boolean): androidx.compose.material3.Color
             inverseSurface = colors.text,
             inversePrimary = colors.primary,
             surfaceTint = colors.primary,
-            scrim = Color.Black
+            scrim = colors.outline
         )
     } else {
         // Esquema de colores para modo claro
@@ -149,7 +112,7 @@ private fun customColorScheme(isDark: Boolean): androidx.compose.material3.Color
             inverseSurface = colors.text,
             inversePrimary = colors.primary,
             surfaceTint = colors.primary,
-            scrim = Color.Black
+            scrim = colors.outline
         )
     }
 }

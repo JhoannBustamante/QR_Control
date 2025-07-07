@@ -1,6 +1,7 @@
 package com.espoch.qrcontrol.ui.Qr
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -25,12 +26,11 @@ import com.espoch.qrcontrol.ui.theme.qrColors
 @Composable
 fun QRCodeViewScreen(
     car: Cars,
-    isDarkMode: Boolean,
+    colors: com.espoch.qrcontrol.ui.theme.QrColors,
     onCancel: () -> Unit,
     onDismissRequest: () -> Unit,
     qrSize: Dp = 300.dp
 ) {
-    val colors = qrColors(isDarkMode)
     val qrData = remember(car) { car.toJson() }
     val qrBitmap = remember(qrData, qrSize) { generateQrBitmap(qrData, qrSize.value.toInt()) }
 

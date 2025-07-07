@@ -298,4 +298,36 @@ object ParkingRepository {
             }
             .addOnFailureListener { onResult(emptyList()) }
     }
+
+    /**
+     * Obtiene un vehículo por su placa
+     * @param plate Placa del vehículo
+     * @param onResult Callback con el objeto Cars? encontrado o null
+     */
+    fun getCarByPlate(plate: String, onResult: (Cars?) -> Unit) {
+        db.collection("cars")
+            .whereEqualTo("plate", plate)
+            .get()
+            .addOnSuccessListener { result ->
+                val car = result.documents.firstOrNull()?.let { doc ->
+                    try {
+                        Cars(
+                            id = (doc.getLong("id") ?: 0L).toInt(),
+                            name = doc.getString("name") ?: "",
+                            plate = doc.getString("plate") ?: "",
+                            brand = doc.getString("brand") ?: "",
+                            model = doc.getString("model") ?: "",
+                            color = doc.getString("color") ?: "",
+                            ownerName = doc.getString("ownerName") ?: "",
+                            ownerId = doc.getString("ownerId") ?: "",
+                            parkingId = (doc.getLong("parkingId") ?: 0L).toInt()
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                onResult(car)
+            }
+            .addOnFailureListener { onResult(null) }
+    }
 }
