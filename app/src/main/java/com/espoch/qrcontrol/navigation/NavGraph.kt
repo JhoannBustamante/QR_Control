@@ -2,12 +2,8 @@ package com.espoch.qrcontrol.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,7 +11,6 @@ import androidx.navigation.compose.rememberNavController
 import com.espoch.qrcontrol.ui.auth.LoginScreen
 import com.espoch.qrcontrol.ui.auth.SignupScreen
 import com.espoch.qrcontrol.ui.auth.StartScreen
-import com.espoch.qrcontrol.ui.theme.QRControlTheme
 import com.espoch.qrcontrol.ui.Qr.QRScannerScreen
 import com.espoch.qrcontrol.ui.Qr.QRRegisteredCarsScreen
 import com.espoch.qrcontrol.ui.history.HistoryScreen
@@ -39,10 +34,8 @@ object Screens {
     const val Start = "start_screen"           // Pantalla de bienvenida
     const val Signup = "signup_screen"         // Pantalla de registro
     const val Home = "home_screen"             // Pantalla principal con navegación inferior
-    const val QRScanner = "qr_scanner_screen"  // Escáner de códigos QR
     const val Parking = "parking_screen"       // Gestión de estacionamiento
     const val Settings = "settings_screen"     // Configuraciones
-    const val AddNewCar = "add_new_car_screen" // Agregar nuevo vehículo
     const val History = "history_screen"       // Historial de estacionamiento (solo supervisores)
     const val Profile = "profile_screen"       // Perfil del usuario
 }

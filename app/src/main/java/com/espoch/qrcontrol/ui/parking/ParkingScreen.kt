@@ -210,7 +210,7 @@ private fun handleAssignSpot(
 }
 
 @Composable
-private fun ParkingHeader(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
+private fun ParkingHeader(colors: QrColors) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -232,7 +232,7 @@ private fun ParkingHeader(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
 }
 
 @Composable
-private fun EnhancedParkingStatusSummary(available: Int, occupied: Int, reserved: Int, colors: com.espoch.qrcontrol.ui.theme.QrColors) {
+private fun EnhancedParkingStatusSummary(available: Int, occupied: Int, reserved: Int, colors: QrColors) {
     Card(
         colors = CardDefaults.cardColors(containerColor = colors.surface),
         modifier = Modifier
@@ -421,7 +421,7 @@ private fun EnhancedParkingSpotGrid(
 @Composable
 private fun CompactParkingSpot(
     spot: ParkingSpot,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors,
+    colors: QrColors,
     carToAssign: Cars?,
     onSpotSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -472,7 +472,7 @@ private fun CompactParkingSpot(
 }
 
 @Composable
-private fun ParkingSkeleton(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
+private fun ParkingSkeleton(colors: QrColors) {
     Column(
         modifier = Modifier
             .fillMaxSize()

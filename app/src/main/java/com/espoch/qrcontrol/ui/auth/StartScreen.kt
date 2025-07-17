@@ -121,7 +121,7 @@ private fun createGoogleSignInClient(context: android.content.Context): com.goog
 private fun WelcomeCard(
     onLoginClick: () -> Unit,
     onGoogleSignIn: () -> Unit,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors
+    colors: QrColors
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -163,7 +163,7 @@ private fun AppLogo() {
  * @param colors Colores del tema actual
  */
 @Composable
-private fun WelcomeTitle(colors: com.espoch.qrcontrol.ui.theme.QrColors) {
+private fun WelcomeTitle(colors: QrColors) {
     Text(
         text = "Bienvenido a \n QR Control",
         color = colors.text,
@@ -216,7 +216,7 @@ private fun LoginButtons(
 private fun rememberGoogleSignInLauncher(
     context: android.content.Context,
     onLoginSuccessGoogle: () -> Unit,
-    colors: com.espoch.qrcontrol.ui.theme.QrColors,
+    colors: QrColors,
     onLoading: (Boolean) -> Unit
 ): androidx.activity.result.ActivityResultLauncher<android.content.Intent> {
     return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->

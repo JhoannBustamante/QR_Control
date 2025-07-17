@@ -1,7 +1,6 @@
 package com.espoch.qrcontrol.ui.Qr
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -13,7 +12,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,7 +19,6 @@ import androidx.compose.ui.window.Dialog
 import com.espoch.qrcontrol.model.Cars
 import com.espoch.qrcontrol.model.toJson
 import com.espoch.qrcontrol.ui.components.generateQrBitmap
-import com.espoch.qrcontrol.ui.theme.qrColors
 
 @Composable
 fun QRCodeViewScreen(

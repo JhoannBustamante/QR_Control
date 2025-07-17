@@ -62,8 +62,6 @@ dependencies {
     implementation(libs.firebase.perf)
     implementation(libs.firebase.storage.ktx)
 
-
-
 //    implementation(libs.play.services.auth)
     implementation(libs.google.auth)
     // QR Code dependencies

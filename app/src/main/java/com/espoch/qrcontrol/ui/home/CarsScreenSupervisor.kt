@@ -107,7 +107,8 @@ private fun CarSupervisorTitle(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("${car.plate}",
+        Text(
+            car.plate,
             color = colors,
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
@@ -198,5 +199,6 @@ private fun extractTimeFromDate(dateString: String): String {
         } catch (e2: Exception) {
             dateString
         }
+
     }
 }
